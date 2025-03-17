@@ -7,14 +7,14 @@ export class PlayerController extends Component {
     private _startJump: boolean = false;
     private _curPos: Vec3 = new Vec3();
     private _targetPos: Vec3 = new Vec3();
-    private _jumpTime: number = 0.5;
+    private _jumpTime: number = 0.1;
 
     start() {
         input.on(Input.EventType.MOUSE_UP, this.onMouseUp, this);
     }
     onMouseUp(event: EventMouse) {
         let button = event.getButton()
-        if (button === 0 || button === 2 && !this._startJump) {
+        if ( (button === 0 || button === 2) && !this._startJump ) {
             this.jumpByStep( {0: 1, 2: 2}[button] );
         }
     }
@@ -26,7 +26,7 @@ export class PlayerController extends Component {
             .to(this._jumpTime, { position: this._targetPos }, {
                 easing: "linear",
                 onComplete: () => {
-                    this._startJump = false
+                    this._startJump = false;
                 }
             })
             .start()
