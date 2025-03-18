@@ -8,7 +8,8 @@ import {
     geometry,
     input,
     tween,
-    PhysicsSystem
+    PhysicsSystem,
+    SkeletalAnimation
 } from 'cc';
 import { GameManager } from './GameManager';
 const { ccclass, property } = _decorator;
@@ -19,10 +20,13 @@ export class PlayerController extends Component {
     @property(Animation)
     bodyAnim: Animation | null = null;
 
+    @property(SkeletalAnimation)
+    CocosAnim: SkeletalAnimation | null = null;
+
     private _startJump: boolean = false;
     private _curPos: Vec3 = new Vec3();
     private _targetPos: Vec3 = new Vec3();
-    private _jumpTime: number = 0.1;
+    private _jumpTime: number = 0.3;
     private _stepAndAnimation: Object = { 0: [1, "OneStep"], 2: [2, "TwoStep"] };
     private static _instance: PlayerController | null = null;
 
@@ -55,7 +59,9 @@ export class PlayerController extends Component {
     }
 
     jumpByStep(step: number, animationClip: "OneStep" | "TwoStep"): void {
-        this.bodyAnim.play( animationClip );
+        this.bodyAnim.play(animationClip);
+        this.CocosAnim.getState('cocos_anim_jump').speed = 3.5; // Jump animation time is relatively long, here to speed up the playback
+        this.CocosAnim.play('cocos_anim_jump'); 
         this._startJump = true;
         this.node.getPosition(this._curPos);
         Vec3.add(this._targetPos, this._curPos, new Vec3(step, 0, 0));
@@ -65,6 +71,9 @@ export class PlayerController extends Component {
                 easing: "linear",
                 onComplete: () => {
                     this._startJump = false;
+                    if (this.CocosAnim) {
+                        this.CocosAnim.play('cocos_anim_idle');
+                    }
                     this.checkGameOver();
                 }
             })
