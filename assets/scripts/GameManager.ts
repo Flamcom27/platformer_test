@@ -44,7 +44,11 @@ export class GameManager extends Component {
         this.jumpTwoBtn.node.on(Button.EventType.CLICK, this.onButtonClicked("TwoStep"), this);
         this.logoBtn.node.on(Button.EventType.CLICK, this.onButtonClicked("Logo"));
     }
-
+    /**
+     * onButtonClicked is a closure, that returns handler functions for buttons
+     * It solves the third and the fourth tasks.
+     * @param {"OneStep" | "TwoStep" | "Logo"} type is a type of a button.
+     */
     onButtonClicked(type: "OneStep" | "TwoStep" | "Logo") {
         switch (type) {
             case "OneStep":
@@ -64,22 +68,23 @@ export class GameManager extends Component {
     onMouseUp(event: EventMouse) {
         const button = event.getButton()
         if (button === 0 || button === 2) {
-            const increment: number = { 0: 1, 2: 2 }[button]
-            this.incrementStepCounter(increment);
+            const step: number = { 0: 1, 2: 2 }[button]
+            this.incrementStepCounter(step);
         }
     }
-
-    incrementStepCounter(increment: number) {
-        this._curScore +=  increment
+    /**
+     * incrementStepCounter is a function, that counts steps and checks if step limit is reached
+     * It solves the fifth task.
+     * @param {number} step
+     */
+    incrementStepCounter(step: number) {
+        this._curScore += step;
         this.stepCounter.string = String(this._curScore);
-        this.checkLimitReached();
-    }
-
-    checkLimitReached() {
         if (this.stepLimit <= this._curScore) {
             GameManager.redirectToStore()
         }
     }
+
     static redirectToStore() {
         if (GameManager.instance.redirect) {
             location.replace("https://play.google.com/store/games");
