@@ -1,9 +1,17 @@
-import { _decorator, Component, Node, Label, input, Input, EventMouse } from 'cc';
+import { _decorator, Component, Node, Label, input, Input, EventMouse, Button } from 'cc';
+import { PlayerController } from "./PlayerController";
+
 const { ccclass, property } = _decorator;
 
 @ccclass('GameManager')
 export class GameManager extends Component {
 
+    @property(Button)
+    jumpOneBtn: Button | null = null;
+    @property(Button)
+    jumpTwoBtn: Button | null = null;
+    @property(Button)
+    logoBtn: Button | null = null;
 
     @property(Boolean)
     redirect: Boolean = false;
@@ -32,22 +40,48 @@ export class GameManager extends Component {
 
     start() {
         input.on(Input.EventType.MOUSE_UP, this.onMouseUp, this);
+        this.jumpOneBtn.node.on(Button.EventType.CLICK, this.onButtonClicked("OneStep"), this);
+        this.jumpTwoBtn.node.on(Button.EventType.CLICK, this.onButtonClicked("TwoStep"), this);
+        this.logoBtn.node.on(Button.EventType.CLICK, this.onButtonClicked("Logo"));
     }
-    onMouseUp(event: EventMouse) {
-        let button = event.getButton()
-        if (button === 0 || button === 2) {
-            this._curScore += { 0: 1, 2: 2 }[button]
-            this.stepCounter.string = String(this._curScore);
-            this.checkLimitReached();
+
+    onButtonClicked(type: "OneStep" | "TwoStep" | "Logo") {
+        switch (type) {
+            case "OneStep":
+                return () => {
+                    PlayerController.instance.jumpByStep(1, "OneStep");
+                    this.incrementStepCounter(1);
+                }
+            case "TwoStep":
+                return () => {
+                    PlayerController.instance.jumpByStep(2, "TwoStep");
+                    this.incrementStepCounter(2);
+                }
+            case "Logo":
+                return GameManager.redirectToStore;
         }
     }
+    onMouseUp(event: EventMouse) {
+        const button = event.getButton()
+        if (button === 0 || button === 2) {
+            const increment: number = { 0: 1, 2: 2 }[button]
+            this.incrementStepCounter(increment);
+        }
+    }
+
+    incrementStepCounter(increment: number) {
+        this._curScore +=  increment
+        this.stepCounter.string = String(this._curScore);
+        this.checkLimitReached();
+    }
+
     checkLimitReached() {
         if (this.stepLimit <= this._curScore) {
             GameManager.redirectToStore()
         }
     }
     static redirectToStore() {
-        if (this.instance.redirect) {
+        if (GameManager.instance.redirect) {
             location.replace("https://play.google.com/store/games");
         }
     }

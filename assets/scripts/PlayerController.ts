@@ -24,21 +24,38 @@ export class PlayerController extends Component {
     private _targetPos: Vec3 = new Vec3();
     private _jumpTime: number = 0.1;
     private _stepAndAnimation: Object = { 0: [1, "OneStep"], 2: [2, "TwoStep"] };
+    private static _instance: PlayerController | null = null;
+
+    static get instance(): PlayerController {
+        return PlayerController._instance;
+    }
+
+    onLoad() {
+        if (PlayerController._instance === null) {
+            PlayerController._instance = this;
+        } else {
+            console.error('Only one PlayerController instance is allowed!');
+            this.destroy();
+        }
+    }
 
     start(): void {
         input.on(Input.EventType.MOUSE_UP, this.onMouseUp, this);
     }
+
     onMouseUp(event: EventMouse): void {
         let button = event.getButton()
 
         if ((button === 0 || button === 2) && !this._startJump) {
-            let step: number, animationClip: string;
+            let step: number, animationClip: "OneStep" | "TwoStep";
             [step, animationClip] = this._stepAndAnimation[button];
-            this.jumpByStep(step);
-            this.bodyAnim.play( animationClip );
+            this.jumpByStep(step, animationClip);
+
         }
     }
-    jumpByStep(step: number): void {
+
+    jumpByStep(step: number, animationClip: "OneStep" | "TwoStep"): void {
+        this.bodyAnim.play( animationClip );
         this._startJump = true;
         this.node.getPosition(this._curPos);
         Vec3.add(this._targetPos, this._curPos, new Vec3(step, 0, 0));
@@ -53,6 +70,7 @@ export class PlayerController extends Component {
             })
             .start()
     }
+
     checkGameOver() {
         const ray: geometry.Ray = new geometry.Ray();
         const targetVector: Vec3 = new Vec3();
