@@ -8,9 +8,9 @@ import {
     geometry,
     input,
     tween,
-    PhysicsRayResult,
     PhysicsSystem
 } from 'cc';
+import { GameManager } from './GameManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('PlayerController')
@@ -60,7 +60,7 @@ export class PlayerController extends Component {
         geometry.Ray.fromPoints(ray, this.node.position, targetVector);
 
         if (!PhysicsSystem.instance.raycast(ray)) {
-            location.replace("https://play.google.com/store/games")
+            GameManager.redirectToStore();
         }
     }
     //update(deltaTime: number) {
